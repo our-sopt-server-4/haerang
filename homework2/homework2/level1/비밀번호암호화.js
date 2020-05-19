@@ -22,7 +22,6 @@ const encrypt = (salt, password) => {
       console.log("hashed: ", hashed);
       fs.writeFile(`hashed.txt`, hashed, (err, data) => {
         if (err) return console.log(err.message);
-        // console.log(`after written:`, data);
       });
     }
   );

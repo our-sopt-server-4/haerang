@@ -7,7 +7,7 @@
 // var result = sumModule.sum(1, 3);
 // console.log("Sum result:", result);
 
-const calculator = require("./mission");
+const calculator = require("./module계산기");
 
 var add = calculator.add(2, 3);
 var substract = calculator.substract(3, 2);
