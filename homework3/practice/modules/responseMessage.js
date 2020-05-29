@@ -15,4 +15,7 @@ module.exports = {
 
   // 프로필 조회
   READ_PROFILE_SUCCESS: "프로필 조회 성공",
+
+  // 비밀번호 암호화 level2
+  PASSWORD_CRYPTO_FAIL: "비밀번호를 저장할 수 없습니다."
 };

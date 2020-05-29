@@ -4,6 +4,38 @@ let User = require("../models/user");
 let util = require("../modules/util");
 let statusCode = require("../modules/statusCode");
 let resMessage = require("../modules/responseMessage");
+// 비밀번호 암호화
+const crypto=require('crypto');
+const fs=require('fs');
+
+
+// Level2 비밀번호 암호화 
+  const encrypt = (salt, password) => {
+    var hashed='';
+    crypto.pbkdf2(
+    password,
+    salt.toString(),
+    1,
+    32,
+    "sha512",
+    (err, derivedKey) => {
+      if (err) throw err;
+       hashed = derivedKey.toString("hex");
+      console.log("salt: ", salt);
+      console.log("hashed: ", hashed);
+      fs.writeFile(`hashed.txt`, hashed, (err, data) => {
+        if (err) 
+        res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, resMessage.PASSWORD_CRYTO_FAIL));
+    
+      });  
+    } 
+  );
+  console.log(hashed);
+  return hashed;
+};
+
 /* GET users listing. */
 router.get("/", function (req, res, next) {
   res.send("respond with a resource");
@@ -49,10 +81,16 @@ router.post("/signup", async (req, res) => {
       .send(util.fail(statusCode.BAD_REQUEST, resMessage.ALREADY_ID));
     return;
   }
+
+// 비밀번호 해시화 
+ const salt = crypto.randomBytes(32).toString("hex");
+
+  hashed_password=encrypt(salt,password);
+
   User.push({
     id,
     name,
-    password,
+    password:hashed_password,
     email,
   });
   res.status(statusCode.OK).send(
