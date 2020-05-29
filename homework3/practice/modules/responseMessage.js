@@ -17,5 +17,8 @@ module.exports = {
   READ_PROFILE_SUCCESS: "프로필 조회 성공",
 
   // 비밀번호 암호화 level2
-  PASSWORD_CRYPTO_FAIL: "비밀번호를 저장할 수 없습니다."
+  PASSWORD_CRYPTO_FAIL: "비밀번호를 저장할 수 없습니다.",
+
+  //POST
+  CREATED_POST:"게시글 생성됨"
 };
