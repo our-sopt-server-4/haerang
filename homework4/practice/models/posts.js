@@ -3,28 +3,28 @@ let moment = require("moment");
 const table = "post";
 
 const post = {
-  readAllPost: async () => {
+  getAllPost: async () => {
     const query = `SELECT * FROM ${table}`;
     try {
       const result = await pool.queryParam(query);
       return result;
     } catch (err) {
-      console.log("readAllPost ERROR : ", err);
+      console.log("getAllPost ERROR : ", err);
       throw err;
     }
   },
-  getPost: async (id) => {
+  getPostbyId: async (id) => {
     const query = `SELECT * FROM ${table} WHERE postIdx = ${id}`;
     try {
       const result = await pool.queryParam(query);
       return result;
     } catch (err) {
-      console.log("readPost ERROR : ", err);
+      console.log("getPostbyId ERROR : ", err);
       throw err;
     }
   },
-  writePost: async (author, title, content) => {
-    const createdAt = moment().format("YYYY년 MM월 DD일");
+  createPost: async (author, title, content) => {
+    const createdAt = moment().format("DD/MM/YYYY");
     const fields = "author, title, content, createdAt";
     const questions = `?, ?, ?, "${createdAt}"`;
     const values = [author, title, content];
@@ -35,7 +35,7 @@ const post = {
       const insertId = result.insertId;
       return insertId;
     } catch (err) {
-      console.log("writePost ERROR : ", err);
+      console.log("createPost ERROR : ", err);
       throw err;
     }
   },

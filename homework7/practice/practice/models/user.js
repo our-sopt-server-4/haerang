@@ -12,10 +12,6 @@ const user = {
       const insertId = result.insertId;
       return insertId;
     } catch (err) {
-      if (err.errno == 1062) {
-        console.log("signup ERROR : ", err.errno, err.code);
-        return -1;
-      }
       console.log("signup ERROR : ", err);
       throw err;
     }
@@ -28,40 +24,37 @@ const user = {
         return false;
       } else return true;
     } catch (err) {
-      if (err.errno == 1062) {
-        console.log("checkUser ERROR : ", err.errno, err.code);
-        return -1;
-      }
       console.log("checkUser ERROR : ", err);
       throw err;
     }
   },
-  signin: async (id, password) => {
+  getUserById: async (id) => {
     const query = `SELECT * FROM ${table} WHERE id="${id}"`;
     try {
-      const result = await pool.queryParam(query);
-      const hasedPassword = await crypto
-        .pbkdf2Sync(password, result[0].salt, 1, 32, "sha512")
-        .toString("hex");
-
-      if (result[0].password === hasedPassword) return true;
-      else return false;
+      return await pool.queryParam(query);
     } catch (err) {
-      console.log("signin ERROR : ", err);
+      console.log("getUserById ERROR : ", err);
       throw err;
     }
   },
-  getUserById: async (id) => {
-    const query = `SELECT * FROM ${table} WHERE userIdx = "${id}"`;
+  getUserByIdx: async (idx) => {
+    const query = `SELECT * FROM ${table} WHERE userIdx="${idx}"`;
     try {
-      const result = await pool.queryParamArr(query);
-      return {
-        id: result[0].id,
-        name: result[0].name,
-        email: result[0].email,
-      };
+      return await pool.queryParam(query);
     } catch (err) {
-      console.log("getUserById ERROR : ", err);
+      console.log("getUserByIdx ERROR : ", err);
+      throw err;
+    }
+  },
+  updateProfile: async (userIdx, profile) => {
+    let query = `UPDATE ${table} SET image="${profile}" WHERE userIdx="${userIdx}"`;
+    try {
+      await pool.queryParam(query);
+      query = `SELECT id, name, email, image FROM ${table} WHERE userIdx="${userIdx}"`;
+      const result = await pool.queryParam(query);
+      return result;
+    } catch (err) {
+      console.log("update profile ERROR : ", err);
       throw err;
     }
   },

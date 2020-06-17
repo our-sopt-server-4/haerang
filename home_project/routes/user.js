@@ -1,9 +1,9 @@
 var express = require("express");
 var router = express.Router();
 let UserModel = require("../models/user");
-let util = require("../modules/util");
-let statusCode = require("../modules/statusCode");
-let responseMessage = require("../modules/responseMessage");
+const { util, statusCode, responseMessage } = require("../modules");
+const fs = require("fs");
+const crypto = require("crypto");
 
 /* GET users listing. */
 router.get("/", function (req, res, next) {
@@ -14,29 +14,38 @@ router.get("/", function (req, res, next) {
   res.status(statusCode.OK).send(result);
 });
 
+// 비밀번호 해시값
 router.post("/signup", async (req, res) => {
   const { id, name, password, email } = req.body;
 
-  if (!id || !name || !password || !email) {
-    return res
-      .status(statusCode.BAD_REQUEST)
-      .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
-  }
+  try {
+    if (!id || !name || !password || !email) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+    }
 
-  if (UserModel.filter((user) => user.id == id).length > 0) {
-    return res
-      .status(statusCode.BAD_REQUEST)
-      .send(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_ID));
-  }
+    if (UserModel.filter((user) => user.id == id).length > 0) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_ID));
+    }
+    const salt = crypto.randomBytes(32).toString("hex");
+    const hashed = crypto
+      .pbkdf2Sync(password, salt, 1, 32, "sha512")
+      .toString("hex");
 
-  UserModel.push({ id, name, password, email });
-  res.status(statusCode.OK).send(
-    util.success(statusCode.OK, responseMessage.CREATED_USER, {
-      id,
-      name,
-      email,
-    })
-  );
+    UserModel.push({ id, name, hashed, salt, email });
+    res.status(statusCode.OK).send(
+      util.success(statusCode.OK, responseMessage.CREATED_USER, {
+        id,
+        hashed,
+        salt,
+        name,
+        email,
+      })
+    );
+  } catch (e) {}
 });
 
 router.post("/signin", async (req, res) => {
@@ -55,18 +64,28 @@ router.post("/signin", async (req, res) => {
       .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
   }
 
-  //비밀번호 확인
-  if (user[0].password !== password) {
+  const hashed = crypto
+    .pbkdf2Sync(password, user[0].salt, 1, 32, "sha512")
+    .toString("hex");
+  if (user[0].hashed !== hashed) {
     return res
       .status(statusCode.BAD_REQUEST)
       .send(util.fail(statusCode.BAD_REQUEST, responseMessage.MISS_MATCH_PW));
   }
+  //비밀번호 확인
+  // if (user[0].password !== password) {
+  //   return res
+  //     .status(statusCode.BAD_REQUEST)
+  //     .send(util.fail(statusCode.BAD_REQUEST, responseMessage.MISS_MATCH_PW));
+  // }
 
   //로그인 성공
   res.status(statusCode.OK).send(
     util.success(statusCode.OK, responseMessage.LOGIN_SUCCESS, {
       id,
       name: user[0].name,
+      password: user[0].password,
+      hashed: user[0].hashed,
     })
   );
 });
@@ -81,7 +100,7 @@ router.get("/profile/:id", async (req, res) => {
       .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
   }
 
-  //조회 성공
+  // 성공
   res.status(statusCode.OK).send(
     util.success(statusCode.OK, responseMessage.LOGIN_SUCCESS, {
       id,

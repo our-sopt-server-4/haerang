@@ -6,6 +6,25 @@ const statusCode = require("../modules/statusCode");
 const resMessage = require("../modules/responseMessage");
 const crypto = require("../modules/crypto");
 
+router.get("/", async (req, res) => {
+  res.status(statusCode.OK).send(util.success(statusCode.OK, "유저조회성공"));
+});
+
+router.get("/getUser/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const resss = await User.getUserById(id);
+
+    return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, "유저 조회", resss));
+  } catch (err) {
+    return res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, err.message));
+  }
+});
+
 router.post("/signup", async (req, res) => {
   const { id, name, password, email } = req.body;
   if (!id || !name || !password || !email) {
@@ -14,13 +33,14 @@ router.post("/signup", async (req, res) => {
       .send(util.fail(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
     return;
   }
-  // // 사용자 중인 아이디가 있는지 확인
-  // if (await User.checkUser(id)) {
-  //   res
-  //     .status(statusCode.BAD_REQUEST)
-  //     .send(util.fail(statusCode.BAD_REQUEST, resMessage.ALREADY_ID));
-  //   return;
-  // }
+  // 사용자 중인 아이디가 있는지 확인
+  if (await User.checkUser(id)) {
+    res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, resMessage.ALREADY_ID));
+    return;
+  }
+
   const { salt, hashed } = await crypto.encrypt(password);
   const idx = await User.signup(id, name, hashed, salt, email);
   if (idx === -1) {
@@ -64,33 +84,33 @@ router.post("/signin", async (req, res) => {
   );
 });
 
-router.get("/profile/:id", async (req, res) => {
-  const id = req.params.id;
-  if (!id) {
-    res
-      .status(statusCode.BAD_REQUEST)
-      .send(util.fail(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
-    return;
-  }
-  const userArray = await User.getUserById(id);
-  if (userArray.length === 0) {
-    res
-      .status(statusCode.BAD_REQUEST)
-      .send(util.fail(statusCode.BAD_REQUEST, resMessage.NO_USER));
-    return;
-  }
-  const user = userArray[0];
-  const dto = {
-    userIdx: user.id,
-    id: user.id,
-    name: user.name,
-    email: user.email,
-  };
-  res.status(statusCode.OK).send(
-    util.success(statusCode.OK, resMessage.READ_PROFILE_SUCCESS, {
-      user: dto,
-    })
-  );
-});
+// router.get("/profile/:id", async (req, res) => {
+//   const id = req.params.id;
+//   if (!id) {
+//     res
+//       .status(statusCode.BAD_REQUEST)
+//       .send(util.fail(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
+//     return;
+//   }
+//   const userArray = await User.getUserById(id);
+//   if (userArray.length === 0) {
+//     res
+//       .status(statusCode.BAD_REQUEST)
+//       .send(util.fail(statusCode.BAD_REQUEST, resMessage.NO_USER));
+//     return;
+//   }
+//   const user = userArray[0];
+//   const dto = {
+//     userIdx: user.id,
+//     id: user.id,
+//     name: user.name,
+//     email: user.email,
+//   };
+//   res.status(statusCode.OK).send(
+//     util.success(statusCode.OK, resMessage.READ_PROFILE_SUCCESS, {
+//       user: dto,
+//     })
+//   );
+// });
 
 module.exports = router;
