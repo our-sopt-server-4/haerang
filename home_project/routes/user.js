@@ -45,49 +45,65 @@ router.post("/signup", async (req, res) => {
         email,
       })
     );
-  } catch (e) {}
+  } catch (e) {
+    res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(
+        util.fail(
+          statusCode.INTERNAL_SERVER_ERROR,
+          responseMessage.FAIL_TO_UPDATE
+        )
+      );
+  }
 });
 
 router.post("/signin", async (req, res) => {
   const { id, password } = req.body;
-  if (!id || !password) {
-    return res
-      .status(statusCode.BAD_REQUEST)
-      .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
-  }
 
-  // 존재하는 ID 확인
-  const user = UserModel.filter((user) => user.id == id);
-  if (user.length == 0) {
+  try {
+    if (!id || !password) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+    }
+
+    // 존재하는 ID 확인
+    const user = UserModel.filter((user) => user.id == id);
+    if (user.length == 0) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
+    }
+
+    const hashed = crypto
+      .pbkdf2Sync(password, user[0].salt, 1, 32, "sha512")
+      .toString("hex");
+    if (user[0].hashed !== hashed) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.MISS_MATCH_PW));
+    }
+    //비밀번호 확인
+    // if (user[0].password !== password) {
+    //   return res
+    //     .status(statusCode.BAD_REQUEST)
+    //     .send(util.fail(statusCode.BAD_REQUEST, responseMessage.MISS_MATCH_PW));
+    // }
+
+    //로그인 성공
+    res.status(statusCode.OK).send(
+      util.success(statusCode.OK, responseMessage.LOGIN_SUCCESS, {
+        id,
+        name: user[0].name,
+        password: user[0].password,
+        hashed: user[0].hashed,
+      })
+    );
+  } catch (e) {
     return res
       .status(statusCode.BAD_REQUEST)
       .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
   }
-
-  const hashed = crypto
-    .pbkdf2Sync(password, user[0].salt, 1, 32, "sha512")
-    .toString("hex");
-  if (user[0].hashed !== hashed) {
-    return res
-      .status(statusCode.BAD_REQUEST)
-      .send(util.fail(statusCode.BAD_REQUEST, responseMessage.MISS_MATCH_PW));
-  }
-  //비밀번호 확인
-  // if (user[0].password !== password) {
-  //   return res
-  //     .status(statusCode.BAD_REQUEST)
-  //     .send(util.fail(statusCode.BAD_REQUEST, responseMessage.MISS_MATCH_PW));
-  // }
-
-  //로그인 성공
-  res.status(statusCode.OK).send(
-    util.success(statusCode.OK, responseMessage.LOGIN_SUCCESS, {
-      id,
-      name: user[0].name,
-      password: user[0].password,
-      hashed: user[0].hashed,
-    })
-  );
 });
 
 router.get("/profile/:id", async (req, res) => {
