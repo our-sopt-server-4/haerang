@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 let User = require("../models/user");
-const { util, statusCode, responseMessage } = require("../modules");
+const { util, statusCode, responseMessage, jwt } = require("../modules");
 const fs = require("fs");
 const encrypt = require("../modules/crypto");
 
@@ -72,14 +72,6 @@ router.post("/signin", async (req, res) => {
         .send(util.fail(statusCode.BAD_REQUEST, await User.checkUser(id)));
     }
 
-    // // 존재하는 ID 확인
-    // const user = UserModel.filter((user) => user.id == id);
-    // if (user.length == 0) {
-    //   return res
-    //     .status(statusCode.BAD_REQUEST)
-    //     .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
-    // }
-
     const user = await User.getUserById(id);
 
     const hashed = await encrypt.encryptWithSalt(password, user.salt);
@@ -89,6 +81,7 @@ router.post("/signin", async (req, res) => {
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.MISS_MATCH_PW));
     }
 
+    const { token, _ } = await jwt.sign(user);
     //로그인 성공
     res.status(statusCode.OK).send(
       util.success(statusCode.OK, responseMessage.LOGIN_SUCCESS, {
@@ -99,9 +92,12 @@ router.post("/signin", async (req, res) => {
       })
     );
   } catch (e) {
-    return res
-      .status(statusCode.BAD_REQUEST)
-      .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
+    // return res
+    //   .status(statusCode.BAD_REQUEST)
+    //   .send(
+    //     util.fail(statusCode.BAD_REQUEST, responseMessage.INTERNAL_SERVER_ERROR)
+    //   );
+    throw e;
   }
 });
 

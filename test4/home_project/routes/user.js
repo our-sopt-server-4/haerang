@@ -4,6 +4,7 @@ let User = require("../models/user");
 const { util, statusCode, responseMessage } = require("../modules");
 const fs = require("fs");
 const encrypt = require("../modules/crypto");
+const jwt = require("../modules/jwt");
 
 /* GET users listing. */
 router.get("/", function (req, res, next) {

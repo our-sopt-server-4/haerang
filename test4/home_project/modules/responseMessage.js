@@ -16,6 +16,4 @@ module.exports = {
   // 프로필 조회
   READ_PROFILE_SUCCESS: "프로필 조회 성공",
   FAIL_TO_UPDATE: "업데이트실패",
-
-  INTERNAL_SERVER_ERROR: "서버 오류",
 };
