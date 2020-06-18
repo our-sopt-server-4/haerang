@@ -80,8 +80,8 @@ router.post("/signin", async (req, res) => {
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.MISS_MATCH_PW));
     }
-
-    const { token, _ } = await jwt.sign(user);
+    console.log(user);
+    // const { token, _ } = await jwt.sign(user);
     //로그인 성공
     res.status(statusCode.OK).send(
       util.success(statusCode.OK, responseMessage.LOGIN_SUCCESS, {

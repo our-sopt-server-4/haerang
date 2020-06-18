@@ -7,19 +7,15 @@ const TOKEN_INVALID = -2;
 
 module.exports = {
   sign: async (user) => {
-    try {
-      const payload = {
-        idx: user.userIdx,
-        name: user.name,
-      };
-      const result = {
-        token: jwt.sign(payload, secretKey, options),
-        refreshToken: randToken.uid(256),
-      };
-      return result;
-    } catch (e) {
-      throw e;
-    }
+    const payload = {
+      idx: user.userIdx,
+      name: user.name,
+    };
+    const result = {
+      token: jwt.sign(payload, secretKey, options),
+      refreshToken: randToken.uid(256),
+    };
+    return result;
   },
   verify: async (token) => {
     let decoded;
