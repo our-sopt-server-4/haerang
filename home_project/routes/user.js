@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-let UserModel = require("../models/user");
+let User = require("../models/user");
 const { util, statusCode, responseMessage } = require("../modules");
 const fs = require("fs");
 const crypto = require("crypto");
@@ -25,24 +25,29 @@ router.post("/signup", async (req, res) => {
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
     }
 
-    if (UserModel.filter((user) => user.id == id).length > 0) {
+    if (User.checkUser(id)) {
       return res
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_ID));
     }
+
     const salt = crypto.randomBytes(32).toString("hex");
     const hashed = crypto
       .pbkdf2Sync(password, salt, 1, 32, "sha512")
       .toString("hex");
 
-    UserModel.push({ id, name, hashed, salt, email });
+    // UserModel.push({ id, name, hashed, salt, email });
+
+    const idx = await User.signup(id, name, password, salt, email);
+    if (idx === -1) {
+      return res
+        .status(statusCode.DB_ERROR)
+        .send(util.fail(statusCode.DB_ERROR, responseMessage.DB_ERROR));
+    }
+
     res.status(statusCode.OK).send(
       util.success(statusCode.OK, responseMessage.CREATED_USER, {
-        id,
-        hashed,
-        salt,
-        name,
-        email,
+        userId: idx + 1,
       })
     );
   } catch (e) {
