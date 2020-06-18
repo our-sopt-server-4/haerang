@@ -12,7 +12,7 @@ module.exports = {
       name: user.name,
     };
     const result = {
-      token: jwt.sign(payload, secretKey, options),
+      token: await jwt.sign(payload, secretKey, options),
       refreshToken: randToken.uid(256),
     };
     return result;

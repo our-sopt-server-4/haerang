@@ -1,9 +1,11 @@
 var express = require("express");
 var router = express.Router();
 let User = require("../models/user");
-const { util, statusCode, responseMessage, jwt } = require("../modules");
+const { util, statusCode, responseMessage } = require("../modules");
 const fs = require("fs");
 const encrypt = require("../modules/crypto");
+// const jwt = require("jsonwebtoken");
+const jwt2 = require("../modules/jwt");
 
 /* GET users listing. */
 router.get("/", function (req, res, next) {
@@ -59,46 +61,54 @@ router.post("/signup", async (req, res) => {
 router.post("/signin", async (req, res) => {
   const { id, password } = req.body;
 
-  try {
-    if (!id || !password) {
-      return res
-        .status(statusCode.BAD_REQUEST)
-        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
-    }
-
-    if (!(await User.checkUser(id))) {
-      return res
-        .status(statusCode.BAD_REQUEST)
-        .send(util.fail(statusCode.BAD_REQUEST, await User.checkUser(id)));
-    }
-
-    const user = await User.getUserById(id);
-
-    const hashed = await encrypt.encryptWithSalt(password, user.salt);
-    if (user.password !== hashed) {
-      return res
-        .status(statusCode.BAD_REQUEST)
-        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.MISS_MATCH_PW));
-    }
-    console.log(user);
-    // const { token, _ } = await jwt.sign(user);
-    //로그인 성공
-    res.status(statusCode.OK).send(
-      util.success(statusCode.OK, responseMessage.LOGIN_SUCCESS, {
-        id,
-        name: user.name,
-        password: user.password,
-        hashed: user.hashed,
-      })
-    );
-  } catch (e) {
-    // return res
-    //   .status(statusCode.BAD_REQUEST)
-    //   .send(
-    //     util.fail(statusCode.BAD_REQUEST, responseMessage.INTERNAL_SERVER_ERROR)
-    //   );
-    throw e;
+  if (!id || !password) {
+    return res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
   }
+
+  if (!(await User.checkUser(id))) {
+    return res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, await User.checkUser(id)));
+  }
+
+  const user = await User.getUserById(id);
+
+  const hashed = await encrypt.encryptWithSalt(password, user.salt);
+  if (user.password !== hashed) {
+    return res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, responseMessage.MISS_MATCH_PW));
+  }
+
+  // const { token } = await jwt.sign(user);
+
+  const payload = {
+    idx: user.userIdx,
+    name: user.name,
+  };
+
+  const { token } = await jwt2.sign(user);
+  console.log(token);
+
+  //로그인 성공
+
+  return res.status(statusCode.OK).send(
+    util.success(statusCode.OK, responseMessage.LOGIN_SUCCESS, {
+      id,
+      name: user.name,
+      password: user.password,
+      hashed: user.hashed,
+      access: token,
+    })
+  );
+
+  return res
+    .status(statusCode.BAD_REQUEST)
+    .send(
+      util.fail(statusCode.BAD_REQUEST, responseMessage.INTERNAL_SERVER_ERROR)
+    );
 });
 
 router.get("/profile/:id", async (req, res) => {
