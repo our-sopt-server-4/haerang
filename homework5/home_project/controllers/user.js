@@ -30,20 +30,21 @@ const user = {
           .send(util.fail(statusCode.DB_ERROR, responseMessage.DB_ERROR));
       }
 
-      res.status(statusCode.OK).send(
+      return res.status(statusCode.OK).send(
         util.success(statusCode.OK, responseMessage.CREATED_USER, {
           idx,
         })
       );
     } catch (e) {
-      res
-        .status(statusCode.INTERNAL_SERVER_ERROR)
-        .send(
-          util.fail(
-            statusCode.INTERNAL_SERVER_ERROR,
-            responseMessage.FAIL_TO_UPDATE
-          )
-        );
+      throw e;
+      // return res
+      //   .status(statusCode.INTERNAL_SERVER_ERROR)
+      //   .send(
+      //     util.fail(
+      //       statusCode.INTERNAL_SERVER_ERROR,
+      //       responseMessage.FAIL_TO_UPDATE
+      //     )
+      //   );
     }
   },
   signin: async (req, res) => {
