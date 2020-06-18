@@ -11,6 +11,7 @@ const user = {
       const result = await pool.queryParamArr(query, values);
       const insertId = result.insertId;
       return insertId;
+      return result;
     } catch (err) {
       if (err.errno == 1062) {
         console.log("signup ERROR : ", err.errno, err.code);
@@ -24,6 +25,7 @@ const user = {
     const query = `SELECT * FROM ${table} WHERE id="${id}"`;
     try {
       const result = await pool.queryParam(query);
+
       if (result.length === 0) {
         return false;
       } else return true;
@@ -36,7 +38,15 @@ const user = {
       throw err;
     }
   },
-  signin: async (id, password) => {},
+  getUserById: async (id) => {
+    const query = `SELECT * FROM ${table} WHERE id="${id}"`;
+    try {
+      const result = await pool.queryParam(query);
+      return result[0];
+    } catch (e) {
+      throw e;
+    }
+  },
 };
 
 module.exports = user;

@@ -24,8 +24,7 @@ router.post("/signup", async (req, res) => {
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
     }
-
-    if (User.checkUser(id)) {
+    if (await User.checkUser(id)) {
       return res
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_ID));
@@ -38,7 +37,7 @@ router.post("/signup", async (req, res) => {
 
     // UserModel.push({ id, name, hashed, salt, email });
 
-    const idx = await User.signup(id, name, password, salt, email);
+    const idx = await User.signup(id, name, hashed, salt, email);
     if (idx === -1) {
       return res
         .status(statusCode.DB_ERROR)
@@ -47,7 +46,7 @@ router.post("/signup", async (req, res) => {
 
     res.status(statusCode.OK).send(
       util.success(statusCode.OK, responseMessage.CREATED_USER, {
-        userId: idx + 1,
+        idx,
       })
     );
   } catch (e) {
@@ -72,18 +71,26 @@ router.post("/signin", async (req, res) => {
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
     }
 
-    // 존재하는 ID 확인
-    const user = UserModel.filter((user) => user.id == id);
-    if (user.length == 0) {
+    if (!(await User.checkUser(id))) {
       return res
         .status(statusCode.BAD_REQUEST)
-        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
+        .send(util.fail(statusCode.BAD_REQUEST, await User.checkUser(id)));
     }
 
+    // // 존재하는 ID 확인
+    // const user = UserModel.filter((user) => user.id == id);
+    // if (user.length == 0) {
+    //   return res
+    //     .status(statusCode.BAD_REQUEST)
+    //     .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
+    // }
+
+    const user = await User.getUserById(id);
+
     const hashed = crypto
-      .pbkdf2Sync(password, user[0].salt, 1, 32, "sha512")
+      .pbkdf2Sync(password, user.salt, 1, 32, "sha512")
       .toString("hex");
-    if (user[0].hashed !== hashed) {
+    if (user.password !== hashed) {
       return res
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.MISS_MATCH_PW));
@@ -99,9 +106,9 @@ router.post("/signin", async (req, res) => {
     res.status(statusCode.OK).send(
       util.success(statusCode.OK, responseMessage.LOGIN_SUCCESS, {
         id,
-        name: user[0].name,
-        password: user[0].password,
-        hashed: user[0].hashed,
+        name: user.name,
+        password: user.password,
+        hashed: user.hashed,
       })
     );
   } catch (e) {
