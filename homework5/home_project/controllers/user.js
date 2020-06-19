@@ -1,6 +1,5 @@
 let User = require("../models/user");
 const { util, statusCode, responseMessage } = require("../modules");
-const fs = require("fs");
 const encrypt = require("../modules/crypto");
 // const jwt = require("jsonwebtoken");
 const jwt = require("../modules/jwt");
