@@ -4,7 +4,7 @@ const table1 = "post";
 
 const blog = {
   checkBlogIdx: async (blogidx) => {
-    const query = `SELECT * FROM ${table1} WHERE blogidx = ${blogidx}`;
+    const query = `SELECT * FROM ${table1} WHERE postIdx = ${blogidx}`;
     try {
       const result = await pool.queryParam(query);
       console.log(result.length);
@@ -15,9 +15,9 @@ const blog = {
       throw err;
     }
   },
-  getBlogByIdx: async (blogidx) => {
+  getBlogByIdx: async (postIdx) => {
     const query = `SELECT * FROM ${table}, ${table1}
-        WHERE ${table}.useridx = ${table1}.useridx AND ${table1}.blogidx = ${blogidx}`;
+        WHERE ${table}.userIdx = ${table1}.author AND ${table1}.postIdx = ${postIdx}`;
     // console.log(query);
     try {
       return await pool.queryParam(query);
@@ -26,10 +26,10 @@ const blog = {
       throw err;
     }
   },
-  newPost: async (userIdx, content, createdAt) => {
-    const fields = "useridx, content, createdAt";
+  newPost: async (author, content, createdAt) => {
+    const fields = "author, content, createdAt";
     const questions = "?, ?, ?";
-    const values = [userIdx, content, createdAt];
+    const values = [author, content, createdAt];
     const query = `INSERT INTO ${table1}(${fields}) VALUES(${questions})`;
 
     try {
@@ -47,9 +47,9 @@ const blog = {
     }
   },
   // body에서 content 값 가져옴
-  updateBlog: async (blogidx, content) => {
+  updateBlog: async (postIdx, content) => {
     const value = [content];
-    const query = `UPDATE ${table1} SET content = ? WHERE blogidx = ${blogidx}`;
+    const query = `UPDATE ${table1} SET content = ? WHERE postIdx = ${postIdx}`;
     try {
       return await pool.queryParamArr(query, value);
     } catch (err) {
@@ -61,8 +61,8 @@ const blog = {
       throw err;
     }
   },
-  deleteBlog: async (blogidx) => {
-    const query = `DELETE FROM ${table1} WHERE blogidx = ${blogidx}`;
+  deleteBlog: async (postIdx) => {
+    const query = `DELETE FROM ${table1} WHERE postIdx = ${postIdx}`;
     try {
       return await pool.queryParam(query);
     } catch (err) {

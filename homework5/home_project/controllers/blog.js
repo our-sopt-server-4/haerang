@@ -14,21 +14,21 @@ const blog = {
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
     }
-    const result = await userModel.getUserById(userIdx);
+    const result = await userModel.getUserByIdx(userIdx);
     console.log(result);
-    if (result[0] === undefined) {
+    if (result === undefined) {
       return res
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, resMessage.NO_USER));
     }
 
-    const idx = await blogModel.newPost(useridx, content, createdAt);
+    const idx = await blogModel.newPost(userIdx, content, createdAt);
     if (idx === -1) {
       return res
         .status(statusCode.DB_ERROR)
         .send(util.fail(statusCode.DB_ERROR, resMessage.DB_ERROR));
     }
-
+    console.log(idx);
     const blog = await blogModel.getBlogByIdx(idx);
     const { token, _ } = await jwt.sign(blog[0]);
 

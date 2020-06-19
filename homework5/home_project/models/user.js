@@ -47,6 +47,15 @@ const user = {
       throw e;
     }
   },
+  getUserByIdx: async (idx) => {
+    const query = `SELECT * FROM ${table} WHERE userIdx="${idx}"`;
+    try {
+      const result = await pool.queryParam(query);
+      return result[0];
+    } catch (e) {
+      throw e;
+    }
+  },
 };
 
 module.exports = user;
