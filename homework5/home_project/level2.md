@@ -6,4 +6,4 @@
 
 ## signin
 
-![로그인](./public/images/eipSignin.png)
+![로그인](./public/images/signin.png)
