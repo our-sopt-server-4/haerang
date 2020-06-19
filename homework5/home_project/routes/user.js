@@ -10,4 +10,3 @@ router.post("/signin", userController.signin);
 router.get("/profile/:id", userController.readProfile);
 
 module.exports = router;
-a;
