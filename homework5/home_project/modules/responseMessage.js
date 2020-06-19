@@ -27,4 +27,7 @@ module.exports = {
   ISSUE_SUCCESS: "새로운 토큰이 생성되었습니다.",
 
   DB_ERROR: "DB 오류",
+
+  //블로그
+  POST_CREATED: "블로그 글 생성됨",
 };

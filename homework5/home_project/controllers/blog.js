@@ -30,14 +30,14 @@ const blog = {
     }
     console.log(idx);
     const blog = await blogModel.getBlogByIdx(idx);
-    const { token, _ } = await jwt.sign(blog[0]);
+    // const { token, _ } = await jwt.sign(blog[0]);
 
-    console.log(token);
+    // console.log(token);
 
     res.status(statusCode.OK).send(
       util.success(statusCode.OK, resMessage.CREATE_BLOG, {
         blogidx: idx,
-        accessToken: token,
+        message: resMessage.POST_CREATED,
       })
     );
   },
