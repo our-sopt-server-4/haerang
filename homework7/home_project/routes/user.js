@@ -13,7 +13,6 @@ router.get("/", function (req, res, next) {
 
 router.post("/signup", userController.signup);
 router.post("/signin", userController.signin);
-// router.get("/profile/:id", userController.readProfile);
 router.post(
   "/profile",
   AuthMiddleware.checkToken,

@@ -27,4 +27,7 @@ module.exports = {
   ISSUE_SUCCESS: "새로운 토큰이 생성되었습니다.",
 
   DB_ERROR: "DB 오류",
+  // 이미지
+  UNSUPPORTED_TYPE: "지원하지 않는 이미지 형식",
+  UPDATE_PROFILE_SUCCESS: "프로필 업데이트 성공",
 };
