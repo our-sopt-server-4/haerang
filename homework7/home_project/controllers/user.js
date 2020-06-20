@@ -100,18 +100,20 @@ const user = {
   },
   updateProfile: async (req, res) => {
     const userIdx = req.decoded.userIdx;
-    const profileImg = req.file.path;
+    const profileImg = req.file.location;
     console.log(req.file);
     // data check - undefined
     if (profileImg === undefined || !userIdx) {
       return res
-        .status(CODE.OK)
-        .send(util.success(CODE.BAD_REQUEST, MSG.NULL_VALUE));
+        .status(statusCode.OK)
+        .send(util.success(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
     }
     // image type check
     const type = req.file.mimetype.split("/")[1];
     if (type !== "jpeg" && type !== "jpg" && type !== "png") {
-      return res.status(CODE.OK).send(util.fail(CODE.OK, MSG.UNSUPPORTED_TYPE));
+      return res
+        .status(statusCode.OK)
+        .send(util.fail(statusCode.OK, responseMessage.UNSUPPORTED_TYPE));
     }
     // call model - database
     const result = await User.updateProfile(userIdx, profileImg);
