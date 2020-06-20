@@ -114,10 +114,16 @@ const user = {
       return res.status(CODE.OK).send(util.fail(CODE.OK, MSG.UNSUPPORTED_TYPE));
     }
     // call model - database
-    const result = await UserModel.updateProfile(userIdx, profileImg);
+    const result = await User.updateProfile(userIdx, profileImg);
     res
-      .status(CODE.OK)
-      .send(util.success(CODE.OK, MSG.UPDATE_PROFILE_SUCCESS, result));
+      .status(statusCode.OK)
+      .send(
+        util.success(
+          statusCode.OK,
+          responseMessage.UPDATE_PROFILE_SUCCESS,
+          result
+        )
+      );
   },
 };
 
